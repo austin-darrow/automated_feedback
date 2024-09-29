@@ -1,4 +1,5 @@
 from fastapi import APIRouter
+from services import db
 
 router = APIRouter(prefix="/api", tags=["feedback"])
 

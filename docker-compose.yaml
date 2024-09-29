@@ -3,7 +3,18 @@ services:
     build: backend
     expose:
       - 8000
-    ports:
-      - 8000:8000
     env_file:
       - .env
+    volumes:
+      - /var/lib/docker/logs/feedback_app/backend:/var/log/backend
+  db:
+    image: postgres:13
+    env_file:
+      - .env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+volumes:
+  postgres_data:
