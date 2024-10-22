@@ -59,7 +59,9 @@ def init_db():
         id SERIAL PRIMARY KEY,
         teacher_id integer REFERENCES users (id) NOT NULL,
         assignment_id integer REFERENCES assignments (id) NOT NULL,
-        content TEXT NOT NULL
+        content TEXT NOT NULL,
+        feedback TEXT NOT NULL,
+        created TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
     """
 

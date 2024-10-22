@@ -28,16 +28,16 @@ def create_user(email: str, password_hash: str, db_connection: Connection):
     db_connection.commit()
     db_cursor.close()
 
-def insert_essay(essay: str, teacher_id: int, assignment_id: int, db_connection):
+def insert_essay(essay: str, feedback: str, teacher_id: int, assignment_id: int, db_connection):
     db_cursor = get_db_cursor(db_connection)
 
     insert_query = """
-    INSERT INTO essays (teacher_id, assignment_id, content)
-    VALUES (?, ?, ?);
+    INSERT INTO essays (teacher_id, assignment_id, content, feedback)
+    VALUES (?, ?, ?, ?);
     """
 
     # Pass the actual values as parameters
-    db_cursor.execute(insert_query, (teacher_id, assignment_id, essay))
+    db_cursor.execute(insert_query, (teacher_id, assignment_id, essay, feedback))
 
     db_connection.commit()
     db_cursor.close()
