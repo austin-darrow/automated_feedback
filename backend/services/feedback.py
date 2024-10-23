@@ -1,53 +1,70 @@
-import torch
-from transformers import AutoTokenizer
-from llama_recipes.inference.model_utils import load_model
+import os
+from openai import OpenAI
 
-base_prompt = '''
-The following is a student's writing sample. Please provide two (2) sentences of feedback.
-The first sentence should praise a specific aspect of the writing sample.
-The second sentence should provide constructive criticism.
-The feedback should be encouraging and helpful.
-Focus on content and ideas. Do not focus on grammar or spelling.
-Student writing:
+prompt_one = '''
+Here is a student ELA essay. Identify the greatest strength and biggest weakness in the writing sample.
+Focus on higher-order concerns, such as:
+- Strength and complexity of the argument
+- Clarity and organization of ideas
+- Factual accuracy
+- Use of evidence and examples
+Your response should be only two sentences, formatted like this:
+Strength: [strength]
+Weakness: [weakness]
 
 '''
 
-# Load the Llama model and tokenizer
-model_name = "meta-llama/Llama-3.2-3B-Instruct"
-tokenizer = AutoTokenizer.from_pretrained(model_name)
-tokenizer.pad_token = tokenizer.eos_token  # Set pad_token to eos_token
+prompt_two = '''
+You are a middle school ELA teacher providing feedback on a student essay.
+You have identified a major strength and weakness in the writing sample.
+Provide praise on the strength and constructive feedback on the weakness.
+You should use language that is encouraging and supportive, suited for a middle school student,
+and use helpful examples and/or comparisons to illustrate your points.
+Your response should be 3-5 sentences, formatted like this:
+Glow: [praise]
+Grow: [constructive feedback]
 
-# Load the model using llama-recipes utility
-model = load_model(model_name=model_name, quantization=False)  # Quantization can be 4bit, 8bit for efficiency
+Here is the student essay, followed by the strength and weakness you identified:
+
+'''
+
+client = OpenAI(
+    base_url = "https://integrate.api.nvidia.com/v1",
+    api_key = os.environ.get("NVIDIA_API_KEY")
+)
+
+def query_api(input: str):
+    completion = client.chat.completions.create(
+        model="nvidia/llama-3.1-nemotron-70b-instruct",
+        messages=[{"role":"user","content":input}],
+        temperature=0.5,
+        top_p=1,
+        max_tokens=1024,
+        stream=True
+    )
+
+    response = ""
+    for chunk in completion:
+        if chunk.choices[0].delta.content is not None:
+            response += chunk.choices[0].delta.content
+
+    return response
 
 def generate_feedback(writing_sample: str):
-    # Concatenate the prompt and the student's writing sample into a single string
-    input_text = f"{base_prompt}{writing_sample}"
+    input_one = f"{prompt_one}\n{writing_sample}"
 
-    # Tokenize the input
-    inputs = tokenizer(input_text, return_tensors="pt", truncation=True, padding=True)
+    response_one = query_api(input_one)
+    print("RESPONSE ONE:\n\n")
+    print(response_one)
 
-    # Perform inference
-    with torch.no_grad():
-        outputs = model.generate(
-            input_ids=inputs["input_ids"],
-            max_new_tokens=200,  # You can adjust this based on your need
-            do_sample=True,
-            top_p=0.95,  # Top-p sampling for diverse results
-            temperature=0.7,  # Controls randomness in generation
-            repetition_penalty=1.2,  # Discourages repetition
-            num_return_sequences=1,  # Number of feedbacks to generate
-        )
+    input_two = f"{prompt_two}\n{writing_sample}\n{response_one}"
+    response_two = query_api(input_two)
+    print("RESPONSE TWO:\n\n")
+    print(response_two)
 
-    # Decode the output text
-    feedback_text = tokenizer.decode(outputs[0], skip_special_tokens=True)
 
-    # Remove input from output text
-    feedback_text = feedback_text.replace(input_text, "")
+    return response_two
 
-    print(feedback_text)
-
-    return feedback_text
 
 
 test = '''

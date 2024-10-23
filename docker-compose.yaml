@@ -6,7 +6,7 @@ services:
     env_file:
       - .env
     volumes:
-      - /home/austin/.cache/huggingface/hub/models--meta-llama--Llama-3.2-3B-Instruct:/root/.cache/huggingface/hub/models--meta-llama--Llama-3.2-3B-Instruct
+      # - /home/austin/.cache/huggingface/hub/models--meta-llama--Llama-3.2-3B-Instruct:/root/.cache/huggingface/hub/models--meta-llama--Llama-3.2-3B-Instruct
       - /var/lib/docker/logs/feedback_app/backend:/var/log/backend
 
 

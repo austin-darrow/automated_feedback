@@ -16,7 +16,7 @@ COPY odbc.ini /etc/odbc.ini
 RUN mkdir /var/log/backend
 
 COPY requirements.txt .
-RUN pip install torch --index-url https://download.pytorch.org/whl/cu121
+# RUN pip install torch --index-url https://download.pytorch.org/whl/cu121
 RUN pip install --no-cache-dir --upgrade -r requirements.txt
 
 COPY . .
