@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 import logging
-from init import setup_db
+import logging.config
+import setup_db
 from contextlib import asynccontextmanager
 # CORS
 from fastapi.middleware.cors import CORSMiddleware

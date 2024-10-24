@@ -27,5 +27,18 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
+  test:
+    build: backend
+    environment:
+      - PYTHONPATH=/backend
+    env_file:
+      - .env
+    working_dir: /backend
+    entrypoint: ["pytest"]
+    depends_on:
+      - backend
+    profiles:
+      - test
+
 volumes:
   postgres_data:
